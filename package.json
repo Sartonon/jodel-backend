@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "backpack"
+    "dev": "backpack",
+    "build": "backpack build"
   },
   "author": "",
   "license": "ISC",
