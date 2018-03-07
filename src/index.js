@@ -4,7 +4,7 @@ const cors = require('cors');
 const http = require('http').Server(app);
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({
-  port: 8080
+  port: 8081
 });
 
 app.use(cors());
@@ -59,6 +59,6 @@ wss.on('error', function() {
   console.log('errored');
 });
 
-app.listen(3001, function() {
+app.listen(3010, function() {
   console.log('listening on port 3001');
 });
