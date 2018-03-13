@@ -1,4 +1,5 @@
 const express = require('express');
+const _ = require('lodash');
 const app = express();
 const cors = require('cors');
 const http = require('http').Server(app);
@@ -28,19 +29,13 @@ wss.broadcast = function broadcast(data) {
 wss.on('connection', function(ws) {
   ws.on('message', function(msg) {
     const data = JSON.parse(msg);
-    if (data.message) {
-      messages.unshift({
-        name: data.name,
-        message: data.message,
-        color: data.color
-      });
-      wss.broadcast(
-        JSON.stringify({
-          name: data.name,
-          message: data.message,
-          color: data.color
-        })
-      );
+
+    if (data.type === "jodel") {
+      handleJodelPost(data);
+    } else if (data.type === "upvote") {
+      handleUpvote(data);
+    } else if (data.type === "downvote") {
+      handleDownvote(data);
     }
   });
 
@@ -60,3 +55,38 @@ wss.on('error', function() {
 app.listen(3010, function() {
   console.log('listening on port 3001');
 });
+
+function handleJodelPost(data) {
+  const jodel = {
+    name: data.name,
+    message: data.message,
+    color: data.color,
+    id: _.uniqueId('jodel_'),
+    votes: 0
+  };
+  if (data.message) {
+    messages.unshift(jodel);
+    wss.broadcast(JSON.stringify({
+      type: 'jodel',
+      ...jodel,
+    }));
+  }
+}
+
+function handleUpvote(data) {
+  const message = messages.find(m => m.id === data.id);
+  message.votes++;
+  wss.broadcast(JSON.stringify({
+    type: "vote",
+    data: message
+  }));
+}
+
+function handleDownvote(data) {
+  const message = messages.find(m => m.id === data.id);
+  message.votes--;
+  wss.broadcast(JSON.stringify({
+    type: "vote",
+    data: message
+  }));
+}
