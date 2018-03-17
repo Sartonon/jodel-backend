@@ -1,5 +1,6 @@
 const express = require('express');
 const _ = require('lodash');
+const axios = require('axios');
 const app = express();
 const cors = require('cors');
 const http = require('http').Server(app);
@@ -56,13 +57,19 @@ app.listen(3010, function() {
   console.log('listening on port 3001');
 });
 
-function handleJodelPost(data) {
+async function handleJodelPost(data) {
+  const apiResponse = await axios.get("http://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json");
+  const apiData = apiResponse.data;
+  console.log(apiData);
   const jodel = {
     name: data.name,
     message: data.message,
     color: data.color,
     id: _.uniqueId('jodel_'),
-    votes: 0
+    votes: 0,
+    quoteText: apiData.quoteText,
+    quoteAuthor: apiData.quoteAuthor,
+    time: data.time,
   };
   if (data.message) {
     messages.unshift(jodel);
