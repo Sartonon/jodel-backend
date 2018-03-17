@@ -1,6 +1,7 @@
 const express = require('express');
 const _ = require('lodash');
 const axios = require('axios');
+const nodemailer = require('nodemailer');
 const app = express();
 const cors = require('cors');
 const http = require('http').Server(app);
@@ -27,6 +28,12 @@ app.get('/', function(req, res) {
 
 app.get('/api/messages', function(req, res) {
   res.send(messages);
+});
+
+app.get('/api/messages/:id', function(req, res) {
+  console.log(req.params.id);
+  const post = messages.find(m => m.id === req.params.id);
+  res.send(post);
 });
 
 wss.broadcast = function broadcast(data) {
@@ -80,6 +87,7 @@ async function handleJodelPost(data) {
     quoteAuthor: apiData.quoteAuthor,
     time: data.time,
   };
+  // sendMail(jodel);
   if (data.message) {
     messages.unshift(jodel);
     wss.broadcast(JSON.stringify({
@@ -105,4 +113,30 @@ function handleDownvote(data) {
     type: "vote",
     data: message
   }));
+}
+
+function sendMail(jodel) {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+      user: 'fbp2aqreg4ydmeyc@ethereal.email',
+      pass: 'eWvtY7H7wMX6dw8eeC'
+    }
+  });
+
+  const mailOptions = {
+    from: 'youremail@gmail.com',
+    to: 'santtu_1993@hotmail.com',
+    subject: 'Uusi jodlaus!',
+    text: jodel.message
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
 }
