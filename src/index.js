@@ -12,6 +12,14 @@ const wss = new WebSocketServer({
 app.use(cors());
 
 const messages = [];
+let connections = 0;
+
+setInterval(() => {
+  wss.broadcast(JSON.stringify({
+    type: 'userAmount',
+    amount: connections,
+  }));
+}, 1000);
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
@@ -28,6 +36,7 @@ wss.broadcast = function broadcast(data) {
 };
 
 wss.on('connection', function(ws) {
+  connections++;
   ws.on('message', function(msg) {
     const data = JSON.parse(msg);
 
@@ -45,6 +54,7 @@ wss.on('connection', function(ws) {
   });
 
   ws.on('close', function(e) {
+    connections--;
     console.log('client closed connection!');
   });
 });
@@ -60,7 +70,6 @@ app.listen(3010, function() {
 async function handleJodelPost(data) {
   const apiResponse = await axios.get("http://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json");
   const apiData = apiResponse.data;
-  console.log(apiData);
   const jodel = {
     name: data.name,
     message: data.message,
