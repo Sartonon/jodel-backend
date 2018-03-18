@@ -16,10 +16,14 @@ const messages = [];
 let connections = 0;
 
 setInterval(() => {
-  wss.broadcast(JSON.stringify({
-    type: 'userAmount',
-    amount: connections,
-  }));
+  try {
+    wss.broadcast(JSON.stringify({
+      type: 'userAmount',
+      amount: connections,
+    }));
+  } catch (err) {
+    console.log(err);
+  }
 }, 1000);
 
 app.get('/', function(req, res) {
